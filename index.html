@@ -1,649 +1,16 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>일단 말해보자고 - AI 갈등 해결 솔루션</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #FF6B6B;
-            --primary-hover: #EE5253;
-            --primary-light: #FFEAE8;
-            --secondary: #48DBFB;
-            --dark: #2D3436;
-            --gray-100: #F8F9FA;
-            --gray-200: #E9ECEF;
-            --gray-300: #DEE2E6;
-            --gray-600: #6C757D;
-            --white: #FFFFFF;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --radius-lg: 20px;
-            --radius-md: 12px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-        }
-
-        body {
-            background-color: #F0F2F5;
-            color: var(--dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 600px;
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 750px;
-            position: relative;
-        }
-
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-            color: var(--white);
-            padding: 24px 20px;
-            text-align: center;
-            position: relative;
-        }
-
-        header h1 {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        header p {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        /* Progress Bar */
-        .progress-bar-container {
-            width: 100%;
-            height: 6px;
-            background-color: var(--gray-200);
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 20%;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
-        }
-
-        /* Main Content */
-        main {
-            padding: 28px 24px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .step {
-            display: none;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .step-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .step-title span {
-            background: var(--primary-light);
-            color: var(--primary);
-            font-size: 14px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 700;
-        }
-
-        .step-desc {
-            font-size: 14px;
-            color: var(--gray-600);
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        /* Form Controls */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--dark);
-        }
-
-        textarea, input[type="text"], select {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius-md);
-            font-size: 15px;
-            transition: all 0.2s;
-            outline: none;
-            background-color: var(--gray-100);
-        }
-
-        textarea:focus, input[type="text"]:focus, select:focus {
-            border-color: var(--primary);
-            background-color: var(--white);
-            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.15);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 140px;
-            line-height: 1.5;
-        }
-
-        /* Radio Card Selection */
-        .radio-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .radio-grid-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .radio-card {
-            position: relative;
-        }
-
-        .radio-card input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .radio-card label {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 16px 12px;
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.2s;
-            background: var(--white);
-            text-align: center;
-            height: 100%;
-            font-weight: 500;
-        }
-
-        .radio-card label i {
-            font-size: 22px;
-            margin-bottom: 8px;
-            color: var(--gray-600);
-        }
-
-        .radio-card input:checked + label {
-            border-color: var(--primary);
-            background-color: var(--primary-light);
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .radio-card input:checked + label i {
-            color: var(--primary);
-        }
-
-        /* Navigation Buttons */
-        .btn-container {
-            display: flex;
-            gap: 12px;
-            margin-top: auto;
-            padding-top: 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--gray-200);
-            color: var(--dark);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--gray-300);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Loading View */
-        .loading-container {
-            text-align: center;
-            padding: 60px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid var(--primary-light);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 24px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 8px;
-        }
-
-        .loading-subtext {
-            font-size: 14px;
-            color: var(--gray-600);
-        }
-
-        /* Result View Components */
-        .result-card {
-            background: var(--gray-100);
-            border-radius: var(--radius-md);
-            padding: 18px;
-            margin-bottom: 16px;
-            border-left: 5px solid var(--primary);
-        }
-
-        .result-card-title {
-            font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 6px;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .fault-meter {
-            height: 20px;
-            background: var(--gray-300);
-            border-radius: 10px;
-            overflow: hidden;
-            display: flex;
-            margin: 10px 0;
-        }
-
-        .fault-user {
-            background: var(--primary);
-            color: white;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: width 0.5s ease;
-        }
-
-        .fault-friend {
-            background: var(--secondary);
-            color: white;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: width 0.5s ease;
-        }
-
-        .script-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 12px;
-        }
-
-        .script-card {
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius-md);
-            padding: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: white;
-        }
-
-        .script-card:hover {
-            border-color: var(--primary);
-        }
-
-        .script-card.selected {
-            border-color: var(--primary);
-            background-color: var(--primary-light);
-        }
-
-        .script-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .script-type {
-            font-weight: 700;
-            font-size: 14px;
-            color: var(--primary);
-        }
-
-        .script-body {
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--dark);
-            white-space: pre-line;
-        }
-
-        .script-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-sm:hover {
-            background: var(--gray-100);
-        }
-    </style>
-</head>
-<body>
-
-<div class="app-container">
-    <header>
-        <h1><i class="fa-solid fa-comments"></i> 일단 말해보자고</h1>
-        <p>친구와 싸웠을 땐? 말로 풀어야 가장 확실하니까!</p>
-    </header>
-
-    <div class="progress-bar-container">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
-
-    <main>
-        <!-- STEP 1: 싸운 상황 -->
-        <div class="step active" id="step1">
-            <div class="step-title">
-                <span>STEP 1</span> 어떤 일로 싸우셨나요?
-            </div>
-            <div class="step-desc">
-                갈등 상황을 객관적으로 작성해 주세요. 솔직하게 작성할수록 더 정확한 대화법을 찾을 수 있어요.
-            </div>
-            <div class="form-group">
-                <label for="situation">싸운 내용 및 내 마음 작성</label>
-                <textarea id="situation" placeholder="예: 약속 시간에 친구가 1시간 늦었는데 사과도 안 해서 화가 났어요. 그래서 나도 모르게 짜증 섞인 말을 던졌고, 친구도 기분 나빠하며 가버렸어요."></textarea>
-            </div>
-            <div class="btn-container">
-                <button class="btn btn-primary" onclick="nextStep(2)">다음으로 <i class="fa-solid fa-arrow-right"></i></button>
-            </div>
-        </div>
-
-        <!-- STEP 2: 친밀도 및 성별 -->
-        <div class="step" id="step2">
-            <div class="step-title">
-                <span>STEP 2</span> 그 친구에 대해 알려주세요
-            </div>
-            <div class="step-desc">
-                관계의 깊이와 성별에 맞춰 어투와 대화 톤앤매너를 추천해 드려요.
-            </div>
-
-            <div class="form-group">
-                <label>친구와의 친밀도</label>
-                <div class="radio-grid radio-grid-3">
-                    <div class="radio-card">
-                        <input type="radio" name="closeness" id="close1" value="어색한/알아가는 사이">
-                        <label for="close1">
-                            <i class="fa-regular fa-smile"></i>
-                            <span>알아가는 사이</span>
-                        </label>
-                    </div>
-                    <div class="radio-card">
-                        <input type="radio" name="closeness" id="close2" value="보통 친구 사이" checked>
-                        <label for="close2">
-                            <i class="fa-solid fa-user-group"></i>
-                            <span>일반 친구</span>
-                        </label>
-                    </div>
-                    <div class="radio-card">
-                        <input type="radio" name="closeness" id="close3" value="둘도 없는 절친 사이">
-                        <label for="close3">
-                            <i class="fa-solid fa-heart"></i>
-                            <span>절친/베프</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>나와 친구의 성별 구성</label>
-                <div class="radio-grid">
-                    <div class="radio-card">
-                        <input type="radio" name="gender" id="g1" value="동성 친구 (남성-남성 또는 여성-여성)" checked>
-                        <label for="g1">
-                            <i class="fa-solid fa-users"></i>
-                            <span>동성 친구</span>
-                        </label>
-                    </div>
-                    <div class="radio-card">
-                        <input type="radio" name="gender" id="g2" value="이성 친구">
-                        <label for="g2">
-                            <i class="fa-solid fa-people-arrows"></i>
-                            <span>이성 친구</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="btn-container">
-                <button class="btn btn-secondary" onclick="nextStep(1)"><i class="fa-solid fa-arrow-left"></i> 이전</button>
-                <button class="btn btn-primary" onclick="nextStep(3)">다음으로 <i class="fa-solid fa-arrow-right"></i></button>
-            </div>
-        </div>
-
-        <!-- STEP 3: 만남 시간과 공간 -->
-        <div class="step" id="step3">
-            <div class="step-title">
-                <span>STEP 3</span> 언제, 어디서 같이 있나요?
-            </div>
-            <div class="step-desc">
-                대화를 시도하기 적절한 타이밍과 분위기를 찾아볼게요.
-            </div>
-
-            <div class="form-group">
-                <label for="environment">주로 만나는 장소나 함께하는 스케줄</label>
-                <textarea id="environment" style="min-height: 100px;" placeholder="예: 매일 같은 반이라 교실에 같이 있어요 / 주말에 학원에서만 만나요 / 퇴근 후 카페에서 만날 수 있어요"></textarea>
-            </div>
-
-            <div class="btn-container">
-                <button class="btn btn-secondary" onclick="nextStep(2)"><i class="fa-solid fa-arrow-left"></i> 이전</button>
-                <button class="btn btn-primary" onclick="analyzeSituation()">AI 분석 시작하기 <i class="fa-solid fa-wand-magic-sparkles"></i></button>
-            </div>
-        </div>
-
-        <!-- LOADING STEP -->
-        <div class="step" id="stepLoading">
-            <div class="loading-container">
-                <div class="spinner"></div>
-                <div class="loading-text">갈등 상황을 분석하고 있어요</div>
-                <div class="loading-subtext">최적의 말투와 대화 장소, 해결 스크립트를 작성 중입니다...</div>
-            </div>
-        </div>
-
-        <!-- STEP 4: 누구의 잘못인가? -->
-        <div class="step" id="step4">
-            <div class="step-title">
-                <span>STEP 4</span> 과실 및 상황 객관적 분석
-            </div>
-            <div class="step-desc">
-                AI가 객관적인 입장에서 분석한 과실 비율과 관점입니다.
-            </div>
-
-            <div class="result-card">
-                <div class="result-card-title"><i class="fa-solid fa-scale-balanced"></i> 예상 과실 비율</div>
-                <div class="fault-meter">
-                    <div class="fault-user" id="userFaultBar" style="width: 50%;">나 50%</div>
-                    <div class="fault-friend" id="friendFaultBar" style="width: 50%;">친구 50%</div>
-                </div>
-                <p id="faultReason" style="font-size: 13px; color: var(--gray-600); margin-top: 8px; line-height: 1.4;"></p>
-            </div>
-
-            <div class="result-card">
-                <div class="result-card-title"><i class="fa-solid fa-lightbulb"></i> 추천 대화 어투 및 분위기</div>
-                <p id="toneAdvice" style="font-size: 14px; line-height: 1.5;"></p>
-            </div>
-
-            <div class="result-card">
-                <div class="result-card-title"><i class="fa-solid fa-location-dot"></i> 추천 만남 장소 및 타이밍</div>
-                <p id="placeAdvice" style="font-size: 14px; line-height: 1.5;"></p>
-            </div>
-
-            <div class="btn-container">
-                <button class="btn btn-secondary" onclick="nextStep(3)"><i class="fa-solid fa-arrow-left"></i> 다시 입력</button>
-                <button class="btn btn-primary" onclick="nextStep(5)">대화 스크립트 보기 <i class="fa-solid fa-arrow-right"></i></button>
-            </div>
-        </div>
-
-        <!-- STEP 5: 해결 스크립트 선택 -->
-        <div class="step" id="step5">
-            <div class="step-title">
-                <span>STEP 5</span> 나에게 맞는 해결 대화 선택
-            </div>
-            <div class="step-desc">
-                원하는 스타일에 맞는 스크립트를 선택해 읽고 준비해 보세요.
-            </div>
-
-            <div class="script-options" id="scriptList">
-                <!-- Script Cards inject dynamically -->
-            </div>
-
-            <div class="btn-container" style="margin-top: 20px;">
-                <button class="btn btn-secondary" onclick="nextStep(4)"><i class="fa-solid fa-arrow-left"></i> 이전 분석</button>
-                <button class="btn btn-primary" onclick="resetApp()"><i class="fa-solid fa-rotate-right"></i> 처음으로 돌아가기</button>
-            </div>
-        </div>
-    </main>
-</div>
-
-<script>
-    let currentStep = 1;
-    let analysisResult = null;
-
-    function updateProgress(step) {
-        const progressBar = document.getElementById('progressBar');
-        const percentage = (step / 5) * 100;
-        progressBar.style.width = percentage + '%';
-    }
-
-    function nextStep(step) {
-        if (step === 2 && !document.getElementById('situation').value.trim()) {
-            alert('싸운 상황을 입력해주세요!');
-            return;
-        }
-        if (step === 4 && !document.getElementById('environment').value.trim()) {
-            alert('함께 있는 시간과 공간을 입력해주세요!');
-            return;
-        }
-
-        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-        document.getElementById('step' + step).classList.add('active');
-        currentStep = step;
-        updateProgress(step);
-    }
-
-    async function analyzeSituation() {
-        const situation = document.getElementById('situation').value;
-        const closeness = document.querySelector('input[name="closeness"]:checked').value;
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-        const environment = document.getElementById('environment').value;
-
-        // Show Loading
-        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-        document.getElementById('stepLoading').classList.add('active');
-
-        const prompt = `
+// API 키 입력 (본인의 Gemini API 키를 넣으세요)
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY";
+
+async function analyzeSituation() {
+    const situation = document.getElementById('situation').value;
+    const closeness = document.querySelector('input[name="closeness"]:checked').value;
+    const gender = document.querySelector('input[name="gender"]:checked').value;
+    const environment = document.getElementById('environment').value;
+
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+    document.getElementById('stepLoading').classList.add('active');
+
+    const prompt = `
 당신은 친구 간의 갈등을 원만하게 해결해주는 유능한 자상한 대화 심리 상담가입니다. 
 다음 상황을 보고 정확하고 객관적인 과실 분석, 조언, 및 말로 갈등을 풀 수 있는 스크립트를 작성해주세요.
 
@@ -653,7 +20,7 @@
 3. 성별 관계: ${gender}
 4. 함께 있는 공간/시간: ${environment}
 
-응답은 반드시 아래 JSON 형식으로만 답해주세요. 다른 말은 포함하지 마세요.
+응답은 반드시 아래 JSON 형식으로만 답해주세요. 다른 설명 없이 순수한 JSON만 반환하세요.
 
 {
   "userFaultRatio": 40,
@@ -664,121 +31,107 @@
   "scripts": [
     {
       "type": "솔직 진솔형",
-      "text": "말투와 내용 스크립트..."
+      "text": "대화 스크립트 내용"
     },
     {
       "type": "담백 가벼운형",
-      "text": "말투와 내용 스크립트..."
+      "text": "대화 스크립트 내용"
     },
     {
       "type": "진지 진심 사과형",
-      "text": "말투와 내용 스크립트..."
+      "text": "대화 스크립트 내용"
     }
   ]
+}`;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        if (!response.ok) throw new Error("API 요청 실패");
+
+        const data = await response.json();
+        let rawText = data.candidates[0].content.parts[0].text;
+        
+        // JSON 파싱 전 불필요한 마크다운 제거
+        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        analysisResult = JSON.parse(rawText);
+
+        displayResults(analysisResult);
+        nextStep(4);
+    } catch (error) {
+        console.error(error);
+        alert("분석 중 오류가 발생했습니다. API 키를 확인하거나 다시 시도해 주세요.");
+        nextStep(3);
+    }
 }
-`;
 
-        try {
-            const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }]
-                })
-            });
+function displayResults(data) {
+    const userFault = data.userFaultRatio || 50;
+    const friendFault = data.friendFaultRatio || 50;
+    
+    document.getElementById('userFaultBar').style.width = userFault + '%';
+    document.getElementById('userFaultBar').innerText = `나 ${userFault}%`;
+    
+    document.getElementById('friendFaultBar').style.width = friendFault + '%';
+    document.getElementById('friendFaultBar').innerText = `친구 ${friendFault}%`;
+    
+    document.getElementById('faultReason').innerText = data.faultReason;
+    document.getElementById('toneAdvice').innerText = data.recommendedTone;
+    document.getElementById('placeAdvice').innerText = data.recommendedPlaceTime;
 
-            const data = await response.json();
-            let rawText = data.candidates[0].content.parts[0].text;
-            
-            // Clean JSON string
-            rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-            analysisResult = JSON.parse(rawText);
+    const scriptListContainer = document.getElementById('scriptList');
+    scriptListContainer.innerHTML = '';
 
-            displayResults(analysisResult);
-            nextStep(4);
-        } catch (error) {
-            console.error(error);
-            alert("분석 중 오류가 발생했습니다. 다시 시도해주세요.");
-            nextStep(3);
-        }
-    }
+    data.scripts.forEach((script, index) => {
+        const card = document.createElement('div');
+        card.className = `script-card ${index === 0 ? 'selected' : ''}`;
+        card.onclick = () => {
+            document.querySelectorAll('.script-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+        };
 
-    function displayResults(data) {
-        // Step 4
-        const userFault = data.userFaultRatio || 50;
-        const friendFault = data.friendFaultRatio || 50;
-        
-        document.getElementById('userFaultBar').style.width = userFault + '%';
-        document.getElementById('userFaultBar').innerText = `나 ${userFault}%`;
-        
-        document.getElementById('friendFaultBar').style.width = friendFault + '%';
-        document.getElementById('friendFaultBar').innerText = `친구 ${friendFault}%`;
-        
-        document.getElementById('faultReason').innerText = data.faultReason;
-        document.getElementById('toneAdvice').innerText = data.recommendedTone;
-        document.getElementById('placeAdvice').innerText = data.recommendedPlaceTime;
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'script-header';
+        cardHeader.innerHTML = `<span class="script-type"><i class="fa-solid fa-comment-dots"></i> ${script.type}</span>`;
 
-        // Step 5
-        const scriptListContainer = document.getElementById('scriptList');
-        scriptListContainer.innerHTML = '';
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn-sm';
+        copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> 복사';
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            copyText(script.text);
+        };
+        cardHeader.appendChild(copyBtn);
 
-        data.scripts.forEach((script, index) => {
-            const card = document.createElement('div');
-            card.className = `script-card ${index === 0 ? 'selected' : ''}`;
-            card.onclick = () => {
-                document.querySelectorAll('.script-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-            };
+        const cardBody = document.createElement('div');
+        cardBody.className = 'script-body';
+        cardBody.innerText = script.text;
 
-            card.innerHTML = `
-                <div class="script-header">
-                    <span class="script-type"><i class="fa-solid fa-comment-dots"></i> ${script.type}</span>
-                    <button class="btn-sm" onclick="event.stopPropagation(); copyText('${escapeQuotes(script.text)}')">
-                        <i class="fa-regular fa-copy"></i> 복사
-                    </button>
-                </div>
-                <div class="script-body">${script.text}</div>
-                <div class="script-actions">
-                    <button class="btn-sm" onclick="event.stopPropagation(); speakText('${escapeQuotes(script.text)}')">
-                        <i class="fa-solid fa-volume-high"></i> 들어보기 (연습)
-                    </button>
-                </div>
-            `;
-            scriptListContainer.appendChild(card);
-        });
-    }
+        const cardActions = document.createElement('div');
+        cardActions.className = 'script-actions';
 
-    function escapeQuotes(str) {
-        return str.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
-    }
+        const speakBtn = document.createElement('button');
+        speakBtn.className = 'btn-sm';
+        speakBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> 들어보기 (연습)';
+        speakBtn.onclick = (e) => {
+            e.stopPropagation();
+            speakText(script.text);
+        };
+        cardActions.appendChild(speakBtn);
 
-    function copyText(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('대화 스크립트가 복사되었습니다!');
-        });
-    }
+        card.appendChild(cardHeader);
+        card.appendChild(cardBody);
+        card.appendChild(cardActions);
 
-    function speakText(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); // Stop current speech
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ko-KR';
-            utterance.rate = 0.9;
-            window.speechSynthesis.speak(utterance);
-        } else {
-            alert('이 브라우저는 음성 합성을 지원하지 않습니다.');
-        }
-    }
+        scriptListContainer.appendChild(card);
+    });
+}
 
-    function resetApp() {
-        document.getElementById('situation').value = '';
-        document.getElementById('environment').value = '';
-        nextStep(1);
-    }
-</script>
-</body>
-</html>
+
+
