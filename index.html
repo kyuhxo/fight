@@ -1,718 +1,328 @@
-.custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 8px;
-        }
-    </style>
-</head><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fight - 맞춤형 갈등 해결 AI 솔루션</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background-color: #f8fafc;
-        }
-        .step-active {
-            color: #4f46e5;
-            border-color: #4f46e5;
-        }
-        .step-done {
-            color: #10b981;
-            border-color: #10b981;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 8px;
-        }
-<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
-
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetApp()">
-                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-indigo-200">
-                    f
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">fight</h1>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">상황 맞춤형 갈등 해결 AI 솔루션</p>
-                </div>
-            </div>
-            
-            <button onclick="toggleApiModal()" class="text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1.5">
-                <i data-lucide="key" class="w-3.5 h-3.5"></i>
-                <span id="apiStatusText">Gemini API 키 연동</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-3xl mx-auto px-4 py-8 w-full flex-grow">
-
-        <!-- Progress Bar (1/3 -> 2/3 -> 3/3) -->
-        <div id="progressContainer" class="mb-8 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex justify-between items-center relative">
-                <!-- Connecting Line -->
-                <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 -z-1"></div>
-                <div id="progressLine" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-500 transition-all duration-300 -z-1" style="width: 0%;"></div>
-
-                <!-- Step 1 -->
-                <div class="flex flex-col items-center bg-white px-2">
-                    <div id="stepDot1" class="w-8 h-8 rounded-full border-2 border-indigo-600 bg-indigo-600 text-white font-semibold flex items-center justify-center text-sm transition">1</div>
-                    <span id="stepLabel1" class="text-xs font-semibold text-indigo-600 mt-1.5">상황 입력 (5W1H)</span>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="flex flex-col items-center bg-white px-2">
-                    <div id="stepDot2" class="w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-400 font-semibold flex items-center justify-center text-sm transition">2</div>
-                    <span id="stepLabel2" class="text-xs font-medium text-slate-400 mt-1.5">관계 & 스타일</span>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="flex flex-col items-center bg-white px-2">
-                    <div id="stepDot3" class="w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-400 font-semibold flex items-center justify-center text-sm transition">3</div>
-                    <span id="stepLabel3" class="text-xs font-medium text-slate-400 mt-1.5">심층 솔루션</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- STEP 1: 5W1H Input Form -->
-        <section id="step1" class="space-y-6">
-            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm">
-                <div class="mb-6">
-                    <h2 class="text-xl font-bold text-slate-900">갈등 상황 육하원칙(5W1H) 입력</h2>
-                    <p class="text-sm text-slate-500 mt-1">상황을 상세히 적어주실수록 입력된 키워드와 문맥을 조합한 정밀 솔루션이 제공됩니다.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Who -->
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i data-lucide="user" class="w-3.5 h-3.5 text-indigo-500"></i> 누가 (Who)
-                        </label>
-                        <input type="text" id="inputWho" placeholder="예: 대학 동기이자 3년 지기 친구" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition">
-                    </div>
-
-                    <!-- When -->
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> 언제 (When)
-                        </label>
-                        <input type="text" id="inputWhen" placeholder="예: 어제 저녁 단톡방에서 약속 정할 때" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition">
-                    </div>
-
-                    <!-- Where -->
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-indigo-500"></i> 어디서 (Where)
-                        </label>
-                        <input type="text" id="inputWhere" placeholder="예: 단체 카톡방 및 인스타그램 스토리" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition">
-                    </div>
-
-                    <!-- What -->
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-500"></i> 무엇을 (What)
-                        </label>
-                        <input type="text" id="inputWhat" placeholder="예: 약속 시간에 또 늦은 후 사과 없이 핑계만 대는 행동" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition">
-                    </div>
-
-                    <!-- How -->
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i data-lucide="activity" class="w-3.5 h-3.5 text-indigo-500"></i> 어떻게 (How - 당시 상황 및 반응)
-                        </label>
-                        <input type="text" id="inputHow" placeholder="예: 내가 화를 내자 상대가 '왜 이렇게 예민하게 구냐'며 도리어 짜증을 내고 읽씹함" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition">
-                    </div>
-
-                    <!-- Why -->
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <i data-lucide="help-circle" class="w-3.5 h-3.5 text-indigo-500"></i> 왜 갈등이 커졌는가 (Why - 내가 느낀 원인과 서운함)
-                        </label>
-                        <textarea id="inputWhy" rows="3" placeholder="예: 한두 번이 아닌 반복된 지각으로 내 시간을 무시한다는 느낌을 받았고, 적반하장 태도에 존중받지 못한다고 느껴 화가 크게 났음." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm transition custom-scrollbar"></textarea>
-                    </div>
-                </div>
-
-                <div class="mt-8 flex justify-end">
-                    <button onclick="goToStep(2)" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-100 flex items-center space-x-2 text-sm">
-                        <span>다음: 관계 세부 설정</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- STEP 2: Relationship & Style Settings -->
-        <section id="step2" class="space-y-6 hidden">
-            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">상대방과의 관계 및 조언 스타일 설정</h2>
-                    <p class="text-sm text-slate-500 mt-1">관계의 깊이와 원하는 솔루션 톤을 맞춤 설정합니다.</p>
-                </div>
-
-                <!-- Intimacy Slider -->
-                <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <div class="flex justify-between items-center">
-                        <label class="text-sm font-bold text-slate-700">친밀도 레벨</label>
-                        <span id="intimacyLabel" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
-                            Lv 3. 자주 만나는 친한 사이
-                        </span>
-                    </div>
-                    <input type="range" id="intimacySlider" min="1" max="5" value="3" oninput="updateIntimacyText(this.value)" class="w-full accent-indigo-600 h-2 bg-slate-200 rounded-lg cursor-pointer">
-                    <div class="flex justify-between text-[11px] text-slate-400 font-medium px-1">
-                        <span>1: 어색함/일적 관계</span>
-                        <span>3: 일반적인 친구</span>
-                        <span>5: 가족/절친</span>
-                    </div>
-                </div>
-
-                <!-- Gender Selection -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">나의 성별</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="selectGender('my', 'male')" id="myGender_male" class="gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">남성</button>
-                            <button type="button" onclick="selectGender('my', 'female')" id="myGender_female" class="gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition border-indigo-600 bg-indigo-50 text-indigo-700">여성</button>
-                            <button type="button" onclick="selectGender('my', 'none')" id="myGender_none" class="gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">비공개</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">상대방 성별</label>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="selectGender('target', 'male')" id="targetGender_male" class="gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition border-indigo-600 bg-indigo-50 text-indigo-700">남성</button>
-                            <button type="button" onclick="selectGender('target', 'female')" id="targetGender_female" class="gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">여성</button>
-                            <button type="button" onclick="selectGender('target', 'none')" id="targetGender_none" class="gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">비공개</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Advice Style (MBTI / Tone) -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">선호하는 AI 솔루션 성향</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <label class="style-card cursor-pointer border-2 border-indigo-600 bg-indigo-50/50 p-3.5 rounded-xl transition text-left relative flex flex-col justify-between" id="styleCard_balance">
-                            <input type="radio" name="adviceStyle" value="balance" checked class="hidden" onchange="updateStyleSelection('balance')">
-                            <div>
-                                <span class="text-xs font-bold text-indigo-700 block mb-0.5">⚖️ 밸런스형</span>
-                                <span class="text-[11px] text-slate-500 leading-tight block">논리적 원인 분석과 심리 공감을 균형 있게 제시</span>
-                            </div>
-                        </label>
-
-                        <label class="style-card cursor-pointer border-2 border-slate-200 p-3.5 rounded-xl hover:border-slate-300 transition text-left relative flex flex-col justify-between" id="styleCard_T">
-                            <input type="radio" name="adviceStyle" value="T" class="hidden" onchange="updateStyleSelection('T')">
-                            <div>
-                                <span class="text-xs font-bold text-slate-800 block mb-0.5">🧠 T형 (현실 솔루션)</span>
-                                <span class="text-[11px] text-slate-500 leading-tight block">감정 배제, 문제 행동 조치 및 명확한 대책 위주</span>
-                            </div>
-                        </label>
-
-                        <label class="style-card cursor-pointer border-2 border-slate-200 p-3.5 rounded-xl hover:border-slate-300 transition text-left relative flex flex-col justify-between" id="styleCard_F">
-                            <input type="radio" name="adviceStyle" value="F" class="hidden" onchange="updateStyleSelection('F')">
-                            <div>
-                                <span class="text-xs font-bold text-slate-800 block mb-0.5">💖 F형 (관계 보호)</span>
-                                <span class="text-[11px] text-slate-500 leading-tight block">상대방 감정 케어 및 상처 없이 회복하는 데 초점</span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Navigation Buttons -->
-                <div class="pt-4 flex justify-between items-center border-t border-slate-100">
-                    <button onclick="goToStep(1)" class="px-5 py-2.5 text-slate-600 hover:bg-slate-100 font-semibold rounded-xl transition text-sm flex items-center space-x-1.5">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        <span>이전으로</span>
-                    </button>
-                    <button onclick="generateSolution()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition shadow-lg shadow-indigo-100 flex items-center space-x-2 text-sm">
-                        <i data-lucide="sparkles" class="w-4 h-4"></i>
-                        <span>맞춤 심층 솔루션 생성</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- STEP 3: Deep Custom Solution Result -->
-        <section id="step3" class="space-y-6 hidden">
-            <!-- Loading Spinner -->
-            <div id="loadingState" class="bg-white p-12 rounded-2xl border border-slate-200 shadow-sm text-center space-y-4">
-                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
-                <div>
-                    <h3 class="text-base font-bold text-slate-800">입력하신 문장과 정황을 분석하고 있습니다...</h3>
-                    <p class="text-xs text-slate-500 mt-1">상대방의 심리 기제 파악 및 4단계 맞춤 실행 솔루션 도출 중</p>
-                </div>
-            </div>
-
-            <!-- Result Content -->
-            <div id="resultState" class="space-y-6 hidden">
-                
-                <!-- Summary & Psychology Analysis -->
-                <div class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl space-y-4">
-                    <div class="flex items-center space-x-2 text-indigo-300">
-                        <i data-lucide="brain-circuit" class="w-5 h-5"></i>
-                        <span class="text-xs font-bold uppercase tracking-wider">상황 재구성 & 심리 분석</span>
-                    </div>
-                    <h3 class="text-xl font-bold leading-snug" id="analysisTitle">분석 결과 로딩 중...</h3>
-                    <p class="text-sm text-indigo-100/90 leading-relaxed font-normal" id="psychologyText">
-                        상대방의 행동 파악 중...
-                    </p>
-                </div>
-
-                <!-- 4-Step Action Matrix -->
-                <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                        <div class="flex items-center space-x-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                                <i data-lucide="compass" class="w-4 h-4"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900">상황 맞춤형 4단계 실행 솔루션</h3>
-                                <p class="text-xs text-slate-500">입력하신 갈등 원인(Why)과 당사자 반응(How)에 직결된 단계별 대응책</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Steps List -->
-                    <div class="space-y-4" id="solutionStepsContainer">
-                        <!-- Dynamically filled -->
-                    </div>
-                </div>
-
-                <!-- Caution Points -->
-                <div class="bg-amber-50/80 border border-amber-200/80 p-6 rounded-2xl space-y-3">
-                    <div class="flex items-center space-x-2 text-amber-800 font-bold text-sm">
-                        <i data-lucide="alert-triangle" class="w-4.5 h-4.5 text-amber-600"></i>
-                        <span>핵심 리스크 및 주의사항 (Caution Points)</span>
-                    </div>
-                    <ul class="space-y-2 text-xs sm:text-sm text-amber-900/90 leading-relaxed list-disc list-inside" id="cautionContainer">
-                        <!-- Dynamically filled -->
-                    </ul>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                    <button onclick="copyFullResult()" class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition shadow-md shadow-indigo-100 flex items-center justify-center space-x-2 text-sm">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                        <span>전체 솔루션 결과 복사</span>
-                    </button>
-                    <button onclick="resetApp()" class="py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition flex items-center justify-center space-x-2 text-sm">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        <span>새로운 상황 분석</span>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white py-6 mt-12">
-        <div class="max-w-4xl mx-auto px-4 text-center text-xs text-slate-400">
-            <p>fight © 2026. 입력된 사용자의 구체적 정황 데이터를 근거로 맞춤 솔루션을 생성합니다.</p>
-        </div>
-    </footer>
-
-    <!-- Modal: Gemini API Key Setting -->
-    <div id="apiModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="key" class="w-4 h-4 text-indigo-600"></i> Gemini API 키 설정
-                </h3>
-                <button onclick="toggleApiModal()" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <p class="text-xs text-slate-500 leading-relaxed">
-                Gemini API 키를 입력하면 시뮬레이션 대신 실시간 Google Gemini 3 Flash AI 모델이 사용자의 5W1H 입력 원문을 직접 분석하여 맞춤 솔루션을 생성합니다. (미입력 시 내장 심층 스마트 엔진 동작)
-            </p>
-            <div>
-                <input type="password" id="userApiKey" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono">
-            </div>
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="saveApiKey()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition">저장 및 적용</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs font-medium transition transform translate-y-20 opacity-0 z-50 flex items-center space-x-2">
-        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-        <span id="toastMsg">복사되었습니다.</span>
-    </div>
-
-    <script>
-        // App State
-        let currentStep = 1;
-        let selectedGender = { my: 'female', target: 'male' };
-        let selectedStyle = 'balance';
-        let apiKey = localStorage.getItem('fight_gemini_api_key') || '';
-        let generatedResultText = '';
-
-        window.onload = function() {
-            lucide.createIcons();
-            if (apiKey) {
-                document.getElementById('userApiKey').value = apiKey;
-                document.getElementById('apiStatusText').innerText = 'API 연동됨';
-                document.getElementById('apiStatusText').classList.add('text-indigo-600');
-            }
-        };
-
-        function toggleApiModal() {
-            const modal = document.getElementById('apiModal');
-            modal.classList.toggle('hidden');
-        }
-
-        function saveApiKey() {
-            const val = document.getElementById('userApiKey').value.trim();
-            apiKey = val;
-            if (val) {
-                localStorage.setItem('fight_gemini_api_key', val);
-                document.getElementById('apiStatusText').innerText = 'API 연동됨';
-                showToast('API 키가 저장되었습니다.');
-            } else {
-                localStorage.removeItem('fight_gemini_api_key');
-                document.getElementById('apiStatusText').innerText = 'Gemini API 키 연동';
-                showToast('API 키가 제거되었습니다. 시뮬레이션 모드로 작동합니다.');
-            }
-            toggleApiModal();
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        function updateIntimacyText(val) {
-            const label = document.getElementById('intimacyLabel');
-            const map = {
-                '1': 'Lv 1. 어색하거나 서먹한 사이 / 비즈니스',
-                '2': 'Lv 2. 가끔 연락하는 평범한 아는 사이',
-                '3': 'Lv 3. 자주 만나는 친한 사이',
-                '4': 'Lv 4. 매우 깊은 관계 (비밀 공유)',
-                '5': 'Lv 5. 최측근 (가족/연인/대체 불가능한 절친)'
-            };
-            label.innerText = map[val];
-        }
-
-        function selectGender(type, gender) {
-            selectedGender[type] = gender;
-            ['male', 'female', 'none'].forEach(g => {
-                const btn = document.getElementById(`${type}Gender_${g}`);
-                if (g === gender) {
-                    btn.className = 'gender-btn py-2 border border-indigo-600 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-semibold transition';
-                } else {
-                    btn.className = 'gender-btn py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition';
-                }
-            });
-        }
-
-        function updateStyleSelection(style) {
-            selectedStyle = style;
-            ['balance', 'T', 'F'].forEach(s => {
-                const card = document.getElementById(`styleCard_${s}`);
-                if (s === style) {
-                    card.className = 'style-card cursor-pointer border-2 border-indigo-600 bg-indigo-50/50 p-3.5 rounded-xl transition text-left relative flex flex-col justify-between';
-                } else {
-                    card.className = 'style-card cursor-pointer border-2 border-slate-200 p-3.5 rounded-xl hover:border-slate-300 transition text-left relative flex flex-col justify-between';
-                }
-            });
-        }
-
-        function goToStep(step) {
-            // Validation for Step 1
-            if (step === 2 && currentStep === 1) {
-                const who = document.getElementById('inputWho').value.trim();
-                const what = document.getElementById('inputWhat').value.trim();
-                if (!who || !what) {
-                    showToast('누가(Who) 및 무엇을(What) 항목은 필수 작성 사항입니다.');
-                    return;
-                }
-            }
-
-            currentStep = step;
-            
-            // Toggle Views
-            document.getElementById('step1').classList.toggle('hidden', step !== 1);
-            document.getElementById('step2').classList.toggle('hidden', step !== 2);
-            document.getElementById('step3').classList.toggle('hidden', step !== 3);
-
-            // Update Header Progress
-            const progressLine = document.getElementById('progressLine');
-            progressLine.style.width = step === 1 ? '0%' : step === 2 ? '50%' : '100%';
-
-            for (let i = 1; i <= 3; i++) {
-                const dot = document.getElementById(`stepDot${i}`);
-                const label = document.getElementById(`stepLabel${i}`);
-                
-                if (i < step) {
-                    dot.className = 'w-8 h-8 rounded-full bg-emerald-500 text-white font-semibold flex items-center justify-center text-sm transition';
-                    dot.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
-                    label.className = 'text-xs font-semibold text-emerald-600 mt-1.5';
-                } else if (i === step) {
-                    dot.className = 'w-8 h-8 rounded-full border-2 border-indigo-600 bg-indigo-600 text-white font-semibold flex items-center justify-center text-sm transition';
-                    dot.innerText = i;
-                    label.className = 'text-xs font-semibold text-indigo-600 mt-1.5';
-                } else {
-                    dot.className = 'w-8 h-8 rounded-full border-2 border-slate-300 bg-white text-slate-400 font-semibold flex items-center justify-center text-sm transition';
-                    dot.innerText = i;
-                    label.className = 'text-xs font-medium text-slate-400 mt-1.5';
-                }
-            }
-            lucide.createIcons();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function resetApp() {
-            document.getElementById('inputWho').value = '';
-            document.getElementById('inputWhen').value = '';
-            document.getElementById('inputWhere').value = '';
-            document.getElementById('inputWhat').value = '';
-            document.getElementById('inputHow').value = '';
-            document.getElementById('inputWhy').value = '';
-            goToStep(1);
-        }
-
-        async function generateSolution() {
-            goToStep(3);
-            document.getElementById('loadingState').classList.remove('hidden');
-            document.getElementById('resultState').classList.add('hidden');
-
-            const data = {
-                who: document.getElementById('inputWho').value.trim(),
-                when: document.getElementById('inputWhen').value.trim() || '최근',
-                where: document.getElementById('inputWhere').value.trim() || '일상적 공간',
-                what: document.getElementById('inputWhat').value.trim(),
-                how: document.getElementById('inputHow').value.trim() || '감정적 마찰 발생',
-                why: document.getElementById('inputWhy').value.trim() || '서로 간 오해 및 소통 부재',
-                intimacy: document.getElementById('intimacySlider').value,
-                myGender: selectedGender.my,
-                targetGender: selectedGender.target,
-                style: selectedStyle
-            };
-
-            if (apiKey) {
-                try {
-                    await fetchGeminiSolution(data);
-                } catch (e) {
-                    console.error("Gemini API Error, falling back to smart simulation:", e);
-                    renderSmartSimulationSolution(data);
-                }
-            } else {
-                // Realistic delay for analysis feel
-                setTimeout(() => {
-                    renderSmartSimulationSolution(data);
-                }, 1200);
-            }
-        }
-
-        // Gemini API Real Call with structured JSON prompt
-        async function fetchGeminiSolution(data) {
-            const systemPrompt = `너는 대한민국 최고의 갈등 해결 심리 전문가이자 소통 컨설턴트다. 
-사용자가 작성한 육하원칙(Who, When, Where, What, How, Why)을 정밀하게 분석하여, 흔해 빠진 추상적 조언(Do/Don't)이 아닌 **사용자가 입력한 실제 문장과 단어, 상황 정황을 직접 인용**하고 이에 맞춘 정밀 4단계 해결 솔루션을 제안하라.
-
-결과는 반드시 JSON 포맷으로 작성하라:
-{
-  "analysisTitle": "상황 및 방어기제 분석 요약 제목 (한 문장)",
-  "psychologyText": "입력된 상황(무엇을, 왜, 어떻게)을 토대로 상대방이 왜 그런 태도를 보였는지 심리 기제 및 오해 가능성 분석 (3-4문장)",
-  "solutionSteps": [
-    {
-      "step": 1,
-      "title": "1단계: 감정 환기 및 접촉 타이밍",
-      "action": "사용자가 입력한 '어디서/언제/어떻게' 항목을 기반으로 한 구체적인 행동 지침",
-      "rationale": "왜 이 접근이 효과적인지 입력 내용 인용 설명"
-    },
-    {
-      "step": 2,
-      "title": "2단계: 갈등 핵심 지점(What/Why)에 대한 직접 대화 앵커링",
-      "action": "사용자가 서운해하는 핵심 원인(Why)을 지적하되 상대 방어기제를 허물 구체적 대화 주안점",
-      "rationale": "대화 방식 설명"
-    },
-    {
-      "step": 3,
-      "title": "3단계: 재발 방지 규칙 구축",
-      "action": "동일 상황 예방을 위해 사용자와 상대방이 합의해야 할 실제 행동 규범",
-      "rationale": "관계 지속 관점의 설명"
-    },
-    {
-      "step": 4,
-      "title": "4단계: 관계 회복 및 관계 격상",
-      "action": "친밀도 레벨과 성향을 고려한 마무리 스탠스",
-      "rationale": "안정화 설명"
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fight - 맞춤형 갈등 해결 AI 솔루션</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
     }
-  ],
-  "cautionPoints": [
-    "사용자가 감정적으로 실수하기 쉬운 구체적 금지 행동 1 (입력문장 연계)",
-    "상황 악화를 초래할 수 있는 반응 방식 2",
-    "경계해야 할 오판 3"
-  ]
-}`;
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px; width: 22px; border-radius: 50%;
+      background: #6366f1; cursor: pointer;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-black text-xl shadow-md">f</div>
+        <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">fight</span>
+      </div>
+      <button onclick="toggleApiModal()" class="text-xs text-slate-500 hover:text-indigo-600 font-medium border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-key text-indigo-500"></i> API 키 설정
+      </button>
+    </div>
+  </header>
 
-            const userPrompt = `
-- 대상(Who): ${data.who}
-- 시점(When): ${data.when}
-- 장소/채널(Where): ${data.where}
-- 사건(What): ${data.what}
-- 당시 상황/반응(How): ${data.how}
-- 갈등 심화 원인(Why): ${data.why}
-- 친밀도 레벨: 5단계 중 ${data.intimacy}단계
-- 내 성별: ${data.myGender}, 상대 성별: ${data.targetGender}
-- 원하는 솔루션 성향: ${data.style} (balance: 밸런스, T: 현실팩트/문제해결, F: 공감/관계보호)`;
+  <main class="max-w-3xl mx-auto px-4 pt-8">
+    <!-- Progress Bar -->
+    <div class="mb-8 glass-card p-4 rounded-2xl shadow-sm">
+      <div class="flex justify-between text-xs font-semibold text-slate-500 mb-2">
+        <span id="step1-label" class="text-indigo-600">1. 상황 입력 (5W1H)</span>
+        <span id="step2-label">2. 조건 & 스타일</span>
+        <span id="step3-label">3. 심층 솔루션</span>
+      </div>
+      <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+        <div id="progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-1/3 transition-all duration-300"></div>
+      </div>
+    </div>
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+    <!-- Step 1 -->
+    <section id="step-1" class="glass-card p-6 md:p-8 rounded-3xl shadow-sm space-y-6">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">1단계: 다툼 상황 정리 (육하원칙)</h2>
+        <p class="text-slate-500 text-sm mt-1">상황을 육하원칙에 맞게 입력해주시면 AI가 세밀하게 분석합니다.</p>
+      </div>
 
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: userPrompt }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: { responseMimeType: "application/json" }
-                })
-            });
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Who (누가)</label>
+          <input type="text" id="who" placeholder="예: 3년 지기 절친 친구가, 동아리 부원이" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">When (언제)</label>
+          <input type="text" id="when" placeholder="예: 어제 저녁 약속 장소에서" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Where (어디서)</label>
+          <input type="text" id="where" placeholder="예: 카페에서 이야기하던 중" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">What (무엇을)</label>
+          <input type="text" id="what" placeholder="예: 약속 시간에 1시간 늦은 문제로 다툽" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+      </div>
 
-            const result = await response.json();
-            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-                const parsed = JSON.parse(text);
-                renderSolutionUI(parsed);
-            } else {
-                throw new Error("Invalid API Response");
-            }
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">How (어떻게 - 갈등 전개 과정)</label>
+        <textarea id="how" rows="3" placeholder="예: 내가 왜 늦었냐고 따지자 친구가 사과 없이 오히려 왜 짜증내냐며 화를 내고 먼저 자리를 뜸" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Why (왜 - 다툼이 커진 감정/이유)</label>
+        <textarea id="why" rows="2" placeholder="예: 평소에도 자주 늦는데 미안한 기색이 전혀 없어서 그동안 참았던 감정이 터짐" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+      </div>
+
+      <button onclick="goToStep(2)" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 transition">
+        다음 단계로 이동 <i class="fa-solid fa-arrow-right ml-2"></i>
+      </button>
+    </section>
+
+    <!-- Step 2 -->
+    <section id="step-2" class="glass-card p-6 md:p-8 rounded-3xl shadow-sm space-y-6 hidden">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">2단계: 관계 및 원하는 스타일 선택</h2>
+        <p class="text-slate-500 text-sm mt-1">상대와의 관계와 원하는 솔루션 톤을 선택해주세요.</p>
+      </div>
+
+      <!-- Intimacy Slider -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-bold text-slate-700">상대와의 친밀도</label>
+          <span id="intimacy-text" class="text-xs font-bold text-indigo-600">3단계: 친한 사이</span>
+        </div>
+        <input type="range" id="intimacy" min="1" max="5" value="3" oninput="updateIntimacyText(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+      </div>
+
+      <!-- Gender -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">내 성별</label>
+          <select id="my-gender" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+            <option value="남성">남성</option>
+            <option value="여성">여성</option>
+            <option value="선택 안 함">선택 안 함</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">상대방 성별</label>
+          <select id="other-gender" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+            <option value="남성">남성</option>
+            <option value="여성">여성</option>
+            <option value="선택 안 함">선택 안 함</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Advice Tone -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-2">원하는 조언 스타일</label>
+        <div class="grid grid-cols-3 gap-3">
+          <button type="button" onclick="selectTone('T')" id="tone-T" class="tone-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-900 p-3 rounded-2xl text-center transition">
+            <div class="font-bold text-sm">🧠 T 스타일</div>
+            <div class="text-[11px] text-slate-500 mt-1">현실 솔루션 & 팩트 분석</div>
+          </button>
+          <button type="button" onclick="selectTone('F')" id="tone-F" class="tone-btn border-2 border-slate-200 p-3 rounded-2xl text-center transition">
+            <div class="font-bold text-sm">💖 F 스타일</div>
+            <div class="text-[11px] text-slate-500 mt-1">공감·위로 & 감정 케어</div>
+          </button>
+          <button type="button" onclick="selectTone('B')" id="tone-B" class="tone-btn border-2 border-slate-200 p-3 rounded-2xl text-center transition">
+            <div class="font-bold text-sm">⚖️ 밸런스형</div>
+            <div class="text-[11px] text-slate-500 mt-1">논리와 공감의 조화</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="goToStep(1)" class="w-1/3 py-4 border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-100 transition">이전</button>
+        <button onclick="generateSolution()" class="w-2/3 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 transition">맞춤 솔루션 생성 <i class="fa-solid fa-wand-magic-sparkles ml-1"></i></button>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section id="step-3" class="glass-card p-6 md:p-8 rounded-3xl shadow-sm space-y-6 hidden">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">3단계: 맞춤 심층 솔루션</h2>
+          <p class="text-slate-500 text-sm mt-1">입력해주신 상황을 심층 분석한 결과입니다.</p>
+        </div>
+        <button onclick="copyResults()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1">
+          <i class="fa-regular fa-copy"></i> 전체 복사
+        </button>
+      </div>
+
+      <div id="loading" class="py-12 text-center space-y-3">
+        <div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm font-medium text-slate-600">상황 맥락을 깊이 분석하고 있습니다...</p>
+      </div>
+
+      <div id="solution-content" class="space-y-6 hidden">
+        <!-- Fact & Psychology -->
+        <div class="bg-indigo-50/60 border border-indigo-100 p-5 rounded-2xl space-y-3">
+          <h3 class="font-bold text-indigo-950 flex items-center gap-2 text-base">
+            <i class="fa-solid fa-magnifying-glass-chart text-indigo-600"></i> 상황 요약 & 상대방 심리 분석
+          </h3>
+          <p id="res-summary" class="text-sm text-slate-700 leading-relaxed"></p>
+        </div>
+
+        <!-- 4 Steps -->
+        <div class="space-y-3">
+          <h3 class="font-bold text-slate-900 flex items-center gap-2 text-base">
+            <i class="fa-solid fa-list-check text-indigo-600"></i> 맥락 밀착 4단계 대처 솔루션
+          </h3>
+          <div id="res-steps" class="space-y-3"></div>
+        </div>
+
+        <!-- Risks & Warnings -->
+        <div class="bg-rose-50/60 border border-rose-100 p-5 rounded-2xl space-y-2">
+          <h3 class="font-bold text-rose-950 flex items-center gap-2 text-base">
+            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> 주의해야 할 리스크 (절대 하지 말아야 할 것)
+          </h3>
+          <p id="res-risks" class="text-sm text-slate-700 leading-relaxed"></p>
+        </div>
+
+        <button onclick="resetAll()" class="w-full py-4 border border-slate-300 text-slate-700 font-bold rounded-2xl hover:bg-slate-100 transition">
+          <i class="fa-solid fa-rotate-left mr-2"></i> 처음부터 다시 하기
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let selectedTone = 'T';
+    let apiKey = localStorage.getItem('fight_gemini_key') || '';
+
+    function toggleApiModal() {
+      const key = prompt('Gemini API 키를 입력하세요 (미입력 시 모의 솔루션 제공):', apiKey);
+      if (key !== null) {
+        apiKey = key.trim();
+        localStorage.setItem('fight_gemini_key', apiKey);
+        alert(apiKey ? 'API 키가 저장되었습니다.' : 'API 키가 삭제되었습니다.');
+      }
+    }
+
+    function updateIntimacyText(val) {
+      const texts = ['1단계: 어색한 사이', '2단계: 아는 사이', '3단계: 친한 사이', '4단계: 매우 친한 사이', '5단계: 절친/가족 사이'];
+      document.getElementById('intimacy-text').innerText = texts[val - 1];
+    }
+
+    function selectTone(tone) {
+      selectedTone = tone;
+      ['T', 'F', 'B'].forEach(t => {
+        const btn = document.getElementById(`tone-${t}`);
+        if (t === tone) {
+          btn.className = 'tone-btn border-2 border-indigo-600 bg-indigo-50 text-indigo-900 p-3 rounded-2xl text-center transition';
+        } else {
+          btn.className = 'tone-btn border-2 border-slate-200 p-3 rounded-2xl text-center transition';
         }
+      });
+    }
 
-        // Local Simulation Engine with high relevance parsing
-        function renderSmartSimulationSolution(data) {
-            const intimacyDesc = data.intimacy >= 4 ? '깊은 신뢰 관계' : data.intimacy <= 2 ? '아직 격식이 필요한 사이' : '상호 신뢰가 형성되어 가는 관계';
-            
-            let styleFocus = '';
-            if (data.style === 'T') {
-                styleFocus = '감정적 소모를 최소화하고, 문제의 재발 방지 및 합리적 타협안 마련에 집중합니다.';
-            } else if (data.style === 'F') {
-                styleFocus = '서로가 받은 감정적 상처를 보듬고, 관계의 끈을 유연하게 지키는 데 집중합니다.';
-            } else {
-                styleFocus = '명확한 사실관계 정리와 서운했던 감정의 경청을 균형 있게 배치합니다.';
-            }
+    function goToStep(step) {
+      [1, 2, 3].forEach(s => {
+        document.getElementById(`step-${s}`).classList.add('hidden');
+        document.getElementById(`step${s}-label`).className = s === step ? 'text-indigo-600 font-bold' : '';
+      });
+      document.getElementById(`step-${step}`).classList.remove('hidden');
+      document.getElementById('progress-bar').style.width = (step / 3 * 100) + '%';
+    }
 
-            const mockResult = {
-                analysisTitle: `"${data.who}"과의 [${data.what.slice(0, 18)}...] 갈등 정밀 재구성`,
-                psychologyText: `입력하신 내용에 따르면, 상대방은 '${data.how.slice(0, 25)}...' 과정에서 자신의 과실이나 방어기제가 자극받았을 가능성이 높습니다. 특히 '${data.why.slice(0, 30)}...'라고 느끼신 부분은 상대방 역시 자신의 자존심이나 미안함을 거칠게 표현하는 과정에서 발생한 오해일 수 있습니다. 현재 상대방은 미안함과 불편함이 섞인 채 대화의 주도권을 잃지 않으려는 심리적 자아방어를 가동 중입니다. (${intimacyDesc}임을 감안한 맞춤 접근 필요)`,
-                solutionSteps: [
-                    {
-                        step: 1,
-                        title: "1단계: 자극 최소화 및 대화 물꼬 터놓기 (Timing & Channel)",
-                        action: `'${data.where}'에서 발생한 갈등의 감정적 과열을 식히기 위해, 감정이 섞인 직설적 따짐 대신 단순 확인식 질문으로 접촉하십시오.`,
-                        rationale: `'${data.when}' 당시의 과열된 감정 상태에서 바로 본론을 꺼내면 다시 '${data.how}'와 같은 방어적 태도가 재현될 수 있습니다.`
-                    },
-                    {
-                        step: 2,
-                        title: "2단계: 핵심 서운함 원인(Why)에 대한 'I-Message' 전달",
-                        action: `'${data.what}' 자체를 비난하기보다, "네가 ~했을 때, 나는 '${data.why.slice(0, 20)}...'라고 느껴서 속상했어"라는 형식으로 내 감정의 사실만을 전달하십시오.`,
-                        rationale: `상대방이 '${data.how}'처럼 반발한 것은 자신 전체가 공격받는다고 느꼈기 때문입니다. 행동과 내 감정을 분리해 전달하면 방어벽이 허물어집니다.`
-                    },
-                    {
-                        step: 3,
-                        title: "3단계: 구체적인 행동 재발 방지 합의 (Action Plan)",
-                        action: `향후 비슷한 상황이 재발하지 않도록, 예를 들어 "다음부터 상황이 생기면 서로 최소 10분 전에 알려주기"와 같이 구체적이고 이행 가능한 규칙 1가지를 명확히 요구하십시오.`,
-                        rationale: `${styleFocus} 단순히 "앞으로 잘하자"는 말은 또 다시 구체적 상황에서 동일한 마찰을 일으킵니다.`
-                    },
-                    {
-                        step: 4,
-                        title: "4단계: 관계 정상화 및 안정적 마무리",
-                        action: `대화 후 상대가 미안함을 표시하거나 타협안을 수용하면, 과거 일을 다시 꺼내지 않고 평소의 편안한 대화 주제나 공동의 관심사로 자연스럽게 전환하십시오.`,
-                        rationale: `${data.intimacy}단계 친밀도를 고려했을 때, 서운함을 풀고 난 뒤의 빠른 일상 복귀가 상대의 부끄러움을 덜어주고 관계를 매끄럽게 해줍니다.`
-                    }
-                ],
-                cautionPoints: [
-                    `상대방의 '${data.how}' 반응에 똑같이 감정적으로 격앙되어 SNS나 주변 사람에게 상황을 공론화하는 행동`,
-                    `'${data.why.slice(0, 15)}...'의 감정이 해소되지 않았다고 해서 과거의 다른 잘잘못까지 끌어올려 비난 범위를 넓히는 것`,
-                    `상대가 미안함을 은연중에 표명했을 때 자존심을 세우기 위해 즉각 받아주지 않고 찬바람을 피우는 태도`
-                ]
-            };
+    async function generateSolution() {
+      goToStep(3);
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('solution-content').classList.add('hidden');
 
-            renderSolutionUI(mockResult);
+      const data = {
+        who: document.getElementById('who').value || '상대방',
+        when: document.getElementById('when').value || '최근',
+        where: document.getElementById('where').value || '장소',
+        what: document.getElementById('what').value || '다툼',
+        how: document.getElementById('how').value || '말다툼 전개',
+        why: document.getElementById('why').value || '감정 대립',
+        intimacy: document.getElementById('intimacy-text').innerText,
+        myGender: document.getElementById('my-gender').value,
+        otherGender: document.getElementById('other-gender').value,
+        tone: selectedTone === 'T' ? '현실적 팩트 폭격 T 스타일' : selectedTone === 'F' ? '따뜻한 감정 위로 F 스타일' : '밸런스형'
+      };
+
+      if (apiKey) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: `갈등 분석 컨설턴트로서 아래 상황을 바탕으로 JSON 형식으로 출력해라.
+JSON 키: summary(상황 및 상대 심리 요약), step1, step2, step3, step4(구체적 4단계 솔루션), risks(주의해야할 리스크)
+
+상황: ${JSON.stringify(data)}` }]
+              }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          });
+          const jsonRes = await res.json();
+          const parsed = JSON.parse(jsonRes.candidates[0].content.parts[0].text);
+          renderResults(parsed);
+          return;
+        } catch (e) {
+          console.error(e);
         }
+      }
 
-        function renderSolutionUI(result) {
-            document.getElementById('analysisTitle').innerText = result.analysisTitle;
-            document.getElementById('psychologyText').innerText = result.psychologyText;
+      // Default fallback
+      setTimeout(() => {
+        renderResults({
+          summary: `${data.who}과의 관계(${data.intimacy})에서 발생한 '${data.what}' 문제는 단순한 사건이 아니라 ${data.why}에 대한 서운함이 축적된 결과입니다.`,
+          step1: `1단계 - 차분한 냉각기: ${data.when} 발생한 갈등 직후이므로, 바로 연락하기보다는 감정이 가라앉을 시간을 최소 하루 이상 확보하세요.`,
+          step2: `2단계 - 핵심 포인트 정리: '${data.how}' 과정에서 상대가 상처받았을 부분과 나의 본래 의도를 구분해 적어보세요.`,
+          step3: `3단계 - 1:1 대화 요청: ${data.where}와 같이 공개된 곳보다는 둘만의 조용한 공간에서 감정적 비난 없이 진솔한 대화를 시도하세요.`,
+          step4: `4단계 - 재발 방지 약속: 약속 시간이나 소통 방식 등 이번 문제의 원인이 된 기준을 명확히 정해두는 것으로 마무리하세요.`,
+          risks: `상대방의 성별(${data.otherGender})이나 관계 단계를 무시하고 메신저로 긴 장문의 비난을 보내거나, 3자를 끌어들여 잘못을 따지는 행동은 갈등을 걷잡을 수 없이 크게 만듭니다.`
+        });
+      }, 1000);
+    }
 
-            // Render 4 Steps
-            const stepsContainer = document.getElementById('solutionStepsContainer');
-            stepsContainer.innerHTML = '';
+    function renderResults(res) {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('solution-content').classList.remove('hidden');
 
-            result.solutionSteps.forEach((s) => {
-                const item = document.createElement('div');
-                item.className = 'bg-slate-50 border border-slate-200/80 rounded-xl p-4 sm:p-5 space-y-2 transition hover:border-indigo-200';
-                item.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">${s.step}</span>
-                        <h4 class="text-sm font-bold text-slate-900">${s.title}</h4>
-                    </div>
-                    <div class="pl-8 space-y-1">
-                        <p class="text-xs sm:text-sm text-slate-800 font-medium leading-relaxed">${s.action}</p>
-                        <p class="text-[11px] sm:text-xs text-indigo-600/90 font-normal">💡 근거: ${s.rationale}</p>
-                    </div>
-                `;
-                stepsContainer.appendChild(item);
-            });
+      document.getElementById('res-summary').innerText = res.summary;
+      document.getElementById('res-risks').innerText = res.risks;
 
-            // Render Caution Points
-            const cautionContainer = document.getElementById('cautionContainer');
-            cautionContainer.innerHTML = '';
-            result.cautionPoints.forEach((c) => {
-                const li = document.createElement('li');
-                li.innerText = c;
-                cautionContainer.appendChild(li);
-            });
+      const stepsContainer = document.getElementById('res-steps');
+      stepsContainer.innerHTML = '';
+      [res.step1, res.step2, res.step3, res.step4].forEach((s, idx) => {
+        if (!s) return;
+        const div = document.createElement('div');
+        div.className = 'p-4 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-start gap-3';
+        div.innerHTML = `
+          <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">${idx + 1}</div>
+          <div class="text-sm text-slate-800 leading-relaxed">${s}</div>
+        `;
+        stepsContainer.appendChild(div);
+      });
+    }
 
-            // Save Plain Text for Full Copy
-            generatedResultText = `[fight 갈등 해결 맞춤 솔루션 Report]
+    function copyResults() {
+      const text = `${document.getElementById('res-summary').innerText}\n\n[대처 솔루션]\n${document.getElementById('res-steps').innerText}\n\n[주의사항]\n${document.getElementById('res-risks').innerText}`;
+      navigator.clipboard.writeText(text);
+      alert('솔루션 내용이 클립보드에 복사되었습니다.');
+    }
 
-■ 분석 요약: ${result.analysisTitle}
-${result.psychologyText}
-
-■ 맞춤형 4단계 실행 솔루션
-${result.solutionSteps.map(s => `${s.step}단계. ${s.title}\n - 실행: ${s.action}\n - 근거: ${s.rationale}`).join('\n\n')}
-
-■ 핵심 리스크 및 주의사항
-${result.cautionPoints.map(c => `- ${c}`).join('\n')}
-`;
-
-            document.getElementById('loadingState').classList.add('hidden');
-            document.getElementById('resultState').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function copyFullResult() {
-            if (!generatedResultText) return;
-            
-            // Clipboard Fallback Strategy
-            const textarea = document.createElement('textarea');
-            textarea.value = generatedResultText;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showToast('전체 솔루션 결과가 클립보드에 복사되었습니다.');
-            } catch (err) {
-                showToast('복사에 실패했습니다. 수동 선택 복사를 이용해 주세요.');
-            }
-            document.body.removeChild(textarea);
-        }
-    </script>
+    function resetAll() {
+      goToStep(1);
+    }
+  </script>
 </body>
 </html>
